@@ -2,6 +2,10 @@
 
 fwmonitor is a Python script that can be used to display ```iptables``` or ```UFW``` logs from your ```syslog``` or a text ```file``` in a nice and easy to understand format in order to conduct network traffic analysis.
 
+## Demo
+
+[![asciicast](https://asciinema.org/a/394593.svg)](https://asciinema.org/a/394593)
+
 ## Usage
 
 For your convenience, you can place the program in your system PATH, like /bin/ or /usr/bin/ . For instance:
