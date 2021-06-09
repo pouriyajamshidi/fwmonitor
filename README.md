@@ -1,6 +1,6 @@
-# IPTABLES/UFW Monitor
+# fwmonitor/IPTABLES Analyzer
 
-fwmonitor is a Python script that can be used to display ```iptables``` or ```UFW``` logs from your ```syslog``` or a text ```file``` in a nice and easy to understand format in order to conduct network traffic analysis.
+fwmonitor is a Python script that can be used to display ```iptables``` or ```UFW``` logs from your ```syslog``` or a log/text file in a nice and easy to understand format in order to conduct network traffic analysis and security audit.
 
 ## Demo
 
@@ -8,27 +8,27 @@ fwmonitor is a Python script that can be used to display ```iptables``` or ```UF
 
 ## Usage
 
-For your convenience, you can place the program in your system PATH, like /bin/ or /usr/bin/ . For instance:
-
-```bash
-cp fwmonitor.py /bin/fwmonitor && chmod +x /bin/fwmonitor
-```
-
-If you prefer to run it where it has been cloned, make it execuatable by running:
+Make the script execuatable:
 
 ```bash
 chmod +x fwmonitor.py
 ```
 
+For your convenience, you can place the program in your system PATH, like ```/bin/``` or ```/usr/bin/``` for instance:
+
+```bash
+sudo cp fwmonitor.py /bin/fwmonitor
+```
+
 This script takes 3 optional arguments. The arguments are:
 
-```-file```   # default is /var/log/syslog
+**```-file```**   # location of log file to be scanned. *Default is /var/log/syslog*
 
-```-key```    # default is "UFW BLOCK" -- make sure of case-sensitivity
+**```-key```**    # keyword that ```IPTABLES``` uses to log events. Make sure of case-sensitivity and specific keyword in your log file. *Default is "UFW BLOCK"*
 
-```-interval```   # default is 60 seconds
+**```-interval```**   # Interval to read the log file from scratch, this is useful for analyzing a live system. If you pass ```onetime``` here, it'll scan the log file once and exits. *Default is 60 seconds.*.
 
-By running it without providing any arguments, default values will be used.
+*By running the script without providing any arguments, default values will be used.*
 
 ```python
 ./fwmonitor.py
@@ -40,7 +40,7 @@ OR
 python3 fwmonitor.py
 ```
 
-OR
+## Examples
 
 To analyze a log file that you have gathered:
 
@@ -48,9 +48,9 @@ To analyze a log file that you have gathered:
 python3 fwmonitor.py -file mytraffic.log -key "IPTABLES_BLOCK" -interval onetime
 ```
 
-By providing ```onetime``` keyword argument to ```-interval``` switch you are asking the program to exit after scanning the log file once.
+As mentioned earlier, by providing ```onetime``` keyword argument to ```-interval``` switch you are asking the program to exit after scanning the log file once.
 
-Another example of its use on a live server:
+Audit a live server:
 
 ```python
 python3 fwmonitor.py -file /var/log/syslog -key "IPTABLES_BLOCK"
@@ -60,7 +60,7 @@ python3 fwmonitor.py -file /var/log/syslog -key "IPTABLES_BLOCK"
 
 Ubuntu and Debian machines.
 
-It can be used on ```Windows``` as well but just to analyze the already gathered log files.
+It can be used on ```Windows``` and ```Mac OS``` as well to analyze the already gathered log file(s).
 
 ## Contributing
 
