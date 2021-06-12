@@ -21,28 +21,34 @@ def sig_handler(frame, signal):
     exit()
 
 
-def print_header():
-    print(f"{txtcolor.GREEN}{txtcolor.BOLD}", end="")
-    print(f"\nCount\tSource IP\tSource Port\tDestination IP", end="")
-    print(f"\t  Destination Port\tProtocol/Type\tLEN\tTTL\tDate")
-    print("-" * 130)
-    print(f"{txtcolor.END}", end="")
-
-
 def get_user_input():
     parser = ArgumentParser()
 
-    parser.add_argument("-file", default="/var/log/syslog",
+    parser.add_argument("-file",
+                        default="/var/log/syslog",
                         help="file to inspect. Default is /var/log/syslog")
-    parser.add_argument("-key", default="UFW BLOCK",
+    parser.add_argument("-key",
+                        default="UFW BLOCK",
                         help="block/reject keyword to look for. Default is 'UFW BLOCK'")
-    parser.add_argument("-interval", default=60,
+    parser.add_argument("-interval",
+                        default=60,
                         help="interval to check the file in seconds. Default is 60" +
                         ". specify 'onetime' to run once")
 
     args = parser.parse_args()
 
     return args.file, args.key, args.interval
+
+
+def validate_interval(interval):
+    if interval == "onetime":
+        return interval
+    try:
+        return int(interval)
+    except ValueError:
+        print(f"{txtcolor.FAIL}[-] Invalid interval")
+        print("\033[0m")
+        exit()
 
 
 def check_file(logfile):
@@ -175,7 +181,7 @@ def analyze_ipv4_log(log, key, interval):
 
         print("\n\n")
 
-        slp_ctr = int(interval)
+        slp_ctr = interval
 
         while slp_ctr != 0:
             print("\033[36m", end="")
@@ -190,6 +196,8 @@ def main():
     signal.signal(signal.SIGINT, sig_handler)
 
     logfile, key, interval = get_user_input()
+
+    interval = validate_interval(interval)
     check_file(logfile)
     log = read_file(logfile)
 
