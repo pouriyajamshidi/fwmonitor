@@ -8,6 +8,12 @@ fwmonitor is a Python script that can be used to display ```iptables``` or ```UF
 
 ## Usage
 
+Clone this repository:
+
+```bash
+git clone https://github.com/pouriyajamshidi/fwmonitor.git
+```
+
 Make the script execuatable:
 
 ```bash
@@ -56,9 +62,15 @@ Audit a live server:
 python3 fwmonitor.py -file /var/log/syslog -key "IPTABLES_BLOCK"
 ```
 
+Ultimately, there is a `sample.log` in this repository that you can utilize to see how this script works without actually having a log file yourself. Use it like:
+
+```bash
+python3 fwmonitor.py -file sample.log -key "UFW BLOCK" -interval onetime
+```
+
 ## Tested on
 
-Ubuntu and Debian machines.
+Ubuntu and Debian derivatives.
 
 It can be used on ```Windows``` and ```Mac OS``` as well to analyze the already gathered log file(s).
 
