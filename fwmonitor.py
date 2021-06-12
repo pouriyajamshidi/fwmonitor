@@ -143,7 +143,8 @@ def analyze_ipv4_log(log, key, interval):
                 print(f'{pktLen}\t', end='')
                 print(f'{TTL}\t', end='')
                 print(f'{logDate}', end='')
-                print(f'{txtcolor.GREEN}\t |')
+                print(" " * (130 - (len(logDate) + 113)) +
+                      f'{txtcolor.GREEN}|')
                 print("-" * 130)
                 print(f"{txtcolor.END}", end="")
 
