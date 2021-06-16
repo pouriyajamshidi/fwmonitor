@@ -66,6 +66,15 @@ def read_file(file):
     return lines
 
 
+def sleep_for(interval):
+    while interval != 0:
+        print("\033[36m", end="")
+        print(f"\r[+] re-scanning in {interval}", flush=True, end=" ")
+        print("\033[0m", end="")
+        interval -= 1
+        sleep(1)
+
+
 def analyze_ipv4_log(log, key, interval):
 
     src_ipv4_ptrn = re.compile(r"SRC=([0-9]{1,3}[\.]){3}[0-9]{1,3}")
@@ -80,7 +89,6 @@ def analyze_ipv4_log(log, key, interval):
     counter = 0
     scanned_lines = 0
     found = False
-    protocol = ""
 
     for line in log:
         scanned_lines += 1
@@ -164,29 +172,16 @@ def analyze_ipv4_log(log, key, interval):
         print(f"[-] Could not find a log with '{key}' keyword")
         print(f"{txtcolor.WARNING}{txtcolor.BOLD}", end="")
 
-        if interval == "onetime":
-            exit()
-
-        print(f"[*] re-scanning in 10 seconds... ", end="")
-        print("[*] Press control+c to exit")
-        print(f"{txtcolor.END}\n", end="")
-
-        sleep(10)
-        return
+        if interval != "onetime":
+            sleep_for(10)
+            return
 
     if interval == "onetime":
         exit()
 
     print("\n\n")
 
-    slp_ctr = interval
-
-    while slp_ctr != 0:
-        print("\033[36m", end="")
-        print(f"\r[+] re-scanning in {slp_ctr}", flush=True, end=" ")
-        print("\033[0m", end="")
-        slp_ctr -= 1
-        sleep(1)
+    sleep_for(interval)
 
 
 def main():
