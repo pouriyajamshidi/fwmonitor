@@ -132,31 +132,31 @@ def analyze_ipv4_log(log, key, interval):
             logDate = re.search(log_date_ptrn, line)[0]
 
             print(f"{txtcolor.BOLD}", end="")
-            print(f'{counter})\t', end='')
-            print(f'{srcIP}\t', end='')
-            print(f'{srcPort}\t\t', end='')
-            print(f'{dstIP}\t  ', end='')
-            print(f'{dstPort}\t\t\t', end='')
+            print(f"{counter})\t", end="")
+            print(f"{srcIP}\t", end="")
+            print(f"{srcPort}\t\t", end="")
+            print(f"{dstIP}\t  ", end="")
+            print(f"{dstPort}\t\t\t", end="")
 
             if protocol == "UDP":
-                print(f'{protocol}\t\t', end='')
+                print(f"{protocol}\t\t", end="")
             elif protocol == "TCP":
-                print(f'{protocol}', end='')
+                print(f"{protocol}", end="")
 
                 pkt_type = re.search(pkt_type_ptrn, line)[0]
                 pkt_type = pkt_type.replace("RES=0x00 ", "/")
 
                 if len(pkt_type) > 12:
-                    print(f'{pkt_type} ', end='')
+                    print(f"{pkt_type} ", end="")
                 else:
-                    print(f'{pkt_type}\t', end='')
+                    print(f"{pkt_type}\t", end="")
             else:
-                print(f'{protocol}\t\t', end='')
+                print(f"{protocol}\t\t", end="")
 
-            print(f'{pktLen}\t', end='')
-            print(f'{TTL}\t', end='')
-            print(f'{logDate}', end='')
-            print(" " * (130 - (len(logDate) + 113)) + f'{txtcolor.GREEN}|')
+            print(f"{pktLen}\t", end="")
+            print(f"{TTL}\t", end="")
+            print(f"{logDate}", end="")
+            print(" " * (130 - (len(logDate) + 113)) + f"{txtcolor.GREEN}|")
             print("-" * 130)
             print(f"{txtcolor.END}", end="")
 
