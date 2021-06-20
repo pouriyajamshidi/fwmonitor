@@ -113,6 +113,7 @@ def analyze_ipv4_log(log, key, interval):
             protocol_raw = re.search(r"PROTO=...", line)[0]
             protocol = protocol_raw.replace("PROTO=", "")
 
+            # let's see if we need to look for src/dst ports
             if protocol == "ICM":
                 protocol = "ICMP"
                 srcPort = "NULL"
@@ -122,6 +123,11 @@ def analyze_ipv4_log(log, key, interval):
                 srcPort = srcPort_raw.replace("SPT=", "")
                 dstPort_raw = re.search(dst_port_ptrn, line)[0]
                 dstPort = dstPort_raw.replace("DPT=", "")
+
+            # tcp has packet type unlike UDP
+            if protocol == "TCP":
+                pkt_type_raw = re.search(pkt_type_ptrn, line)[0]
+                pkt_type = pkt_type_raw.replace("RES=0x00 ", "/")
 
             pktLen = re.search(pkt_len_ptrn, line)[0]
             pktLen = pktLen.replace("LEN=", "")
@@ -138,20 +144,13 @@ def analyze_ipv4_log(log, key, interval):
             print(f"{dstIP}\t  ", end="")
             print(f"{dstPort}\t\t\t", end="")
 
-            if protocol == "UDP":
-                print(f"{protocol}\t\t", end="")
+            if protocol == "UDP" or protocol == "ICMP":
+                print(f"{protocol}", end="")
+                print(" " * (16 - len(protocol)), end="")
             elif protocol == "TCP":
                 print(f"{protocol}", end="")
-
-                pkt_type = re.search(pkt_type_ptrn, line)[0]
-                pkt_type = pkt_type.replace("RES=0x00 ", "/")
-
-                if len(pkt_type) > 12:
-                    print(f"{pkt_type} ", end="")
-                else:
-                    print(f"{pkt_type}\t", end="")
-            else:
-                print(f"{protocol}\t\t", end="")
+                print(f"{pkt_type}", end="")
+                print(" " * (13 - len(pkt_type)), end="")
 
             print(f"{pktLen}\t", end="")
             print(f"{TTL}\t", end="")
@@ -159,9 +158,6 @@ def analyze_ipv4_log(log, key, interval):
             print(" " * (130 - (len(logDate) + 113)) + f"{txtcolor.GREEN}|")
             print("-" * 130)
             print(f"{txtcolor.END}", end="")
-
-        else:
-            pass
 
     print("\033[36m", end="")
     print(f"\n[*] Scanned {scanned_lines} lines!")
