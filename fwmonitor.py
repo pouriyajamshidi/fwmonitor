@@ -75,6 +75,18 @@ def sleep_for(interval):
         sleep(1)
 
 
+def report_not_found(key):
+    print(f"{txtcolor.FAIL}{txtcolor.BOLD}", end="")
+    print(f"[-] Could not find a log with '{key}' keyword")
+    print(f"{txtcolor.WARNING}{txtcolor.BOLD}", end="")
+
+
+def display_scanned_lines(scanned_lines):
+    print("\033[36m", end="")
+    print(f"\n[*] Scanned {scanned_lines} lines!")
+    print("\033[0m")
+
+
 def analyze_ipv4_log(log, key, interval):
 
     src_ipv4_ptrn = re.compile(r"SRC=([0-9]{1,3}[\.]){3}[0-9]{1,3}")
@@ -159,15 +171,10 @@ def analyze_ipv4_log(log, key, interval):
             print("-" * 130)
             print(f"{txtcolor.END}", end="")
 
-    print("\033[36m", end="")
-    print(f"\n[*] Scanned {scanned_lines} lines!")
-    print("\033[0m", end="")
+    display_scanned_lines(scanned_lines)
 
     if not found:
-        print(f"{txtcolor.FAIL}{txtcolor.BOLD}", end="")
-        print(f"[-] Could not find a log with '{key}' keyword")
-        print(f"{txtcolor.WARNING}{txtcolor.BOLD}", end="")
-
+        report_not_found(key)
         if interval != "onetime":
             sleep_for(10)
             return
@@ -176,7 +183,6 @@ def analyze_ipv4_log(log, key, interval):
         exit()
 
     print("\n\n")
-
     sleep_for(interval)
 
 
