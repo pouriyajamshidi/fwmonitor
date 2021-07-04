@@ -1,6 +1,6 @@
 # fwmonitor/IPTABLES Analyzer
 
-`fwmonitor` is a program that can be used to display ```iptables``` or ```UFW``` logs from your ```syslog``` or a log/text file in a nice and easy to understand format in order to conduct network traffic analysis and security audit.
+`fwmonitor` is a program that can be used to display ```iptables``` or ```UFW``` logs from your ```syslog``` (*active*) or a gathered log/text file (*passive*) in a nice and easy to understand format in order to conduct network traffic analysis and security audit.
 
 ## Demo
 
