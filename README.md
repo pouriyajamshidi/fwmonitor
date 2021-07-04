@@ -1,6 +1,6 @@
 # fwmonitor/IPTABLES Analyzer
 
-fwmonitor is a Python script that can be used to display ```iptables``` or ```UFW``` logs from your ```syslog``` or a log/text file in a nice and easy to understand format in order to conduct network traffic analysis and security audit.
+`fwmonitor` is a program that can be used to display ```iptables``` or ```UFW``` logs from your ```syslog``` or a log/text file in a nice and easy to understand format in order to conduct network traffic analysis and security audit.
 
 ## Demo
 
@@ -14,7 +14,7 @@ Clone this repository:
 git clone https://github.com/pouriyajamshidi/fwmonitor.git
 ```
 
-Make the script execuatable:
+Make the script executable:
 
 ```bash
 chmod +x fwmonitor.py
@@ -73,6 +73,11 @@ python3 fwmonitor.py -file sample.log -key "UFW BLOCK" -interval onetime
 Ubuntu and Debian derivatives.
 
 It can be used on ```Windows``` and ```Mac OS``` as well to analyze the already gathered log file(s).
+
+## TODO
+
+- [ ] Implement smart spacing
+- [ ] IPv6 support
 
 ## Contributing
 
