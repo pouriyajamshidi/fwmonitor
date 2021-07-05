@@ -61,7 +61,7 @@ def check_file(logfile):
 
 
 def read_file(file):
-    with open(file, "r") as f:
+    with open(file, "r", errors="ignore") as f:
         lines = f.readlines()
     return lines
 
@@ -91,6 +91,8 @@ def analyze_ipv4_log(log, key, interval):
 
     src_ipv4_ptrn = re.compile(r"SRC=([0-9]{1,3}[\.]){3}[0-9]{1,3}")
     dst_ipv4_ptrn = re.compile(r"DST=([0-9]{1,3}[\.]){3}[0-9]{1,3}")
+    # proto_ptrn = re.compile(r"PROTO=...")
+    proto_ptrn = re.compile(r"PROTO=\S*")
     src_port_ptrn = re.compile(r"SPT=\d*")
     dst_port_ptrn = re.compile(r"DPT=\d*")
     pkt_len_ptrn = re.compile(r"LEN=\d*")
@@ -122,12 +124,16 @@ def analyze_ipv4_log(log, key, interval):
             dstIP_raw = re.search(dst_ipv4_ptrn, line)[0]
             dstIP = dstIP_raw.replace("DST=", "")
 
-            protocol_raw = re.search(r"PROTO=...", line)[0]
+            protocol_raw = re.search(proto_ptrn, line)[0]
             protocol = protocol_raw.replace("PROTO=", "")
 
             # let's see if we need to look for src/dst ports
-            if protocol == "ICM":
+            if protocol == "ICM" or protocol == "ICMP":
                 protocol = "ICMP"
+                srcPort = "NULL"
+                dstPort = "NULL"
+            elif protocol == "2":
+                protocol = "IGMP"
                 srcPort = "NULL"
                 dstPort = "NULL"
             else:
@@ -156,7 +162,7 @@ def analyze_ipv4_log(log, key, interval):
             print(f"{dstIP}\t  ", end="")
             print(f"{dstPort}\t\t\t", end="")
 
-            if protocol == "UDP" or protocol == "ICMP":
+            if protocol == "UDP" or protocol == "ICMP" or protocol == "IGMP":
                 print(f"{protocol}", end="")
                 print(" " * (16 - len(protocol)), end="")
             elif protocol == "TCP":

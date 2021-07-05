@@ -76,6 +76,7 @@ It can be used on ```Windows``` and ```Mac OS``` as well to analyze the already 
 
 ## TODO
 
+- [ ] IGMP support
 - [ ] Implement smart spacing
 - [ ] IPv6 support
 
