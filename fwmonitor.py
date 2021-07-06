@@ -8,12 +8,12 @@ from time import sleep
 
 
 class txtcolor:
-    BLUE = '\033[94m'
-    GREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    END = '\033[0m'
-    BOLD = '\033[1m'
+    BLUE = "\033[94m"
+    GREEN = "\033[92m"
+    WARNING = "\033[93m"
+    FAIL = "\033[91m"
+    END = "\033[0m"
+    BOLD = "\033[1m"
 
 
 def sig_handler(frame, signal):
@@ -24,16 +24,22 @@ def sig_handler(frame, signal):
 def get_user_input():
     parser = ArgumentParser()
 
-    parser.add_argument("-file",
-                        default="/var/log/syslog",
-                        help="file to inspect. Default is /var/log/syslog")
-    parser.add_argument("-key",
-                        default="UFW BLOCK",
-                        help="block/reject keyword to look for. Default is 'UFW BLOCK'")
-    parser.add_argument("-interval",
-                        default=60,
-                        help="interval to check the file in seconds. Default is 60" +
-                        ". specify 'onetime' to run once")
+    parser.add_argument(
+        "-file",
+        default="/var/log/syslog",
+        help="file to inspect. Default is /var/log/syslog",
+    )
+    parser.add_argument(
+        "-key",
+        default="UFW BLOCK",
+        help="block/reject keyword to look for. Default is 'UFW BLOCK'",
+    )
+    parser.add_argument(
+        "-interval",
+        default=60,
+        help="interval to check the file in seconds. Default is 60"
+        + ". specify 'onetime' to run once",
+    )
 
     args = parser.parse_args()
 
@@ -199,13 +205,13 @@ def main():
 
     interval = validate_interval(interval)
     check_file(logfile)
-    log = read_file(logfile)
 
     print(f"{txtcolor.BOLD}", end="")
     print(f"\n{txtcolor.BLUE}[*] Scanning {logfile} using {key} keyword")
     print(f"{txtcolor.END}", end="")
 
     while True:
+        log = read_file(logfile)
         analyze_ipv4_log(log, key, interval)
 
 
