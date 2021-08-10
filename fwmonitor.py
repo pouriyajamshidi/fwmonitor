@@ -136,6 +136,9 @@ def analyze_ipv4_log(log, key, interval):
         protocol_raw = re.search(proto_ptrn, line)[0]
         protocol = protocol_raw.replace("PROTO=", "")
 
+        # to have a more compact code and make line 159 possible
+        srcPort = dstPort = None
+
         # let's see if we need to look for src/dst ports
         if protocol in ["TCP", "UDP"]:
             srcPort_raw = re.search(src_port_ptrn, line)[0]
@@ -147,15 +150,13 @@ def analyze_ipv4_log(log, key, interval):
             if protocol == "TCP":
                 pkt_type_raw = re.search(pkt_type_ptrn, line)[0]
                 pkt_type = pkt_type_raw.replace("RES=0x00 ", "/")
+
         elif protocol in ["ICM", "ICMP"]:
             protocol = "ICMP"
-            srcPort = "NULL"
-            dstPort = "NULL"
         elif protocol == "2":
             protocol = "IGMP"
-            srcPort = "NULL"
-            dstPort = "NULL"
-        else:
+
+        if not srcPort or not dstPort:
             srcPort = "NULL"
             dstPort = "NULL"
 
