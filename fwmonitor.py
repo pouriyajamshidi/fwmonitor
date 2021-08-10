@@ -133,7 +133,7 @@ def analyze_ipv4_log(log, key, interval):
             protocol = protocol_raw.replace("PROTO=", "")
 
             # let's see if we need to look for src/dst ports
-            if protocol == "ICM" or protocol == "ICMP":
+            if protocol in ["ICM", "ICMP"]:
                 protocol = "ICMP"
                 srcPort = "NULL"
                 dstPort = "NULL"
