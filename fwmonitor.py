@@ -17,8 +17,7 @@ class txtcolor:
 
 
 def sig_handler(frame, signal):
-    print("\033[0m")
-    exit()
+    exit(txtcolor.END)
 
 
 def get_user_input():
@@ -112,75 +111,83 @@ def analyze_ipv4_log(log, key, interval):
     for line in log:
         scanned_lines += 1
 
-        if key in line and re.search(src_ipv4_ptrn, line):
-            found = True
-            counter += 1
-            if counter == 1 or (counter % 15) == 0:
-                print(f"{txtcolor.GREEN}{txtcolor.BOLD}", end="")
-                print(f"\nCount\tSource IP\tSource Port", end="")
-                print(f"\tDestination IP\t  Destination Port", end="")
-                print(f"\tProtocol/Type\tLEN\tTTL\tDate")
-                print("-" * 130)
-                print(f"{txtcolor.END}", end="")
+        if key not in line or not re.search(src_ipv4_ptrn, line):
+            continue
 
-            srcIP_raw = re.search(src_ipv4_ptrn, line)[0]
-            srcIP = srcIP_raw.replace("SRC=", "")
+        found = True
+        counter += 1
 
-            dstIP_raw = re.search(dst_ipv4_ptrn, line)[0]
-            dstIP = dstIP_raw.replace("DST=", "")
+        # Delegating this banner print to another function will result in
+        # hundreds of thousands if not millions of function calls on large files
+        if counter == 1 or (counter % 15) == 0:
+            print(f"{txtcolor.GREEN}{txtcolor.BOLD}", end="")
+            print(f"\nCount\tSource IP\tSource Port", end="")
+            print(f"\tDestination IP\t  Destination Port", end="")
+            print(f"\tProtocol/Type\tLEN\tTTL\tDate")
+            print("-" * 130)
+            print(f"{txtcolor.END}", end="")
 
-            protocol_raw = re.search(proto_ptrn, line)[0]
-            protocol = protocol_raw.replace("PROTO=", "")
+        srcIP_raw = re.search(src_ipv4_ptrn, line)[0]
+        srcIP = srcIP_raw.replace("SRC=", "")
 
-            # let's see if we need to look for src/dst ports
-            if protocol in ["ICM", "ICMP"]:
-                protocol = "ICMP"
-                srcPort = "NULL"
-                dstPort = "NULL"
-            elif protocol == "2":
-                protocol = "IGMP"
-                srcPort = "NULL"
-                dstPort = "NULL"
-            else:
-                srcPort_raw = re.search(src_port_ptrn, line)[0]
-                srcPort = srcPort_raw.replace("SPT=", "")
-                dstPort_raw = re.search(dst_port_ptrn, line)[0]
-                dstPort = dstPort_raw.replace("DPT=", "")
+        dstIP_raw = re.search(dst_ipv4_ptrn, line)[0]
+        dstIP = dstIP_raw.replace("DST=", "")
+
+        protocol_raw = re.search(proto_ptrn, line)[0]
+        protocol = protocol_raw.replace("PROTO=", "")
+
+        # let's see if we need to look for src/dst ports
+        if protocol in ["TCP", "UDP"]:
+            srcPort_raw = re.search(src_port_ptrn, line)[0]
+            srcPort = srcPort_raw.replace("SPT=", "")
+            dstPort_raw = re.search(dst_port_ptrn, line)[0]
+            dstPort = dstPort_raw.replace("DPT=", "")
 
             # tcp has packet type unlike UDP
             if protocol == "TCP":
                 pkt_type_raw = re.search(pkt_type_ptrn, line)[0]
                 pkt_type = pkt_type_raw.replace("RES=0x00 ", "/")
+        elif protocol in ["ICM", "ICMP"]:
+            protocol = "ICMP"
+            srcPort = "NULL"
+            dstPort = "NULL"
+        elif protocol == "2":
+            protocol = "IGMP"
+            srcPort = "NULL"
+            dstPort = "NULL"
+        else:
+            srcPort = "NULL"
+            dstPort = "NULL"
 
-            pktLen = re.search(pkt_len_ptrn, line)[0]
-            pktLen = pktLen.replace("LEN=", "")
+        pktLen = re.search(pkt_len_ptrn, line)[0]
+        pktLen = pktLen.replace("LEN=", "")
 
-            TTL_raw = re.search(TTL_ptrn, line)[0]
-            TTL = TTL_raw.replace("TTL=", "")
+        TTL_raw = re.search(TTL_ptrn, line)[0]
+        TTL = TTL_raw.replace("TTL=", "")
 
-            logDate = re.search(log_date_ptrn, line)[0]
+        logDate = re.search(log_date_ptrn, line)[0]
 
-            print(f"{txtcolor.BOLD}", end="")
-            print(f"{counter})\t", end="")
-            print(f"{srcIP}\t", end="")
-            print(f"{srcPort}\t\t", end="")
-            print(f"{dstIP}\t  ", end="")
-            print(f"{dstPort}\t\t\t", end="")
+        print(f"{txtcolor.BOLD}", end="")
+        print(f"{counter})\t", end="")
+        print(f"{srcIP}\t", end="")
+        print(f"{srcPort}\t\t", end="")
+        print(f"{dstIP}\t  ", end="")
+        print(f"{dstPort}\t\t\t", end="")
 
-            if protocol != "TCP":
-                print(f"{protocol}", end="")
-                print(" " * (16 - len(protocol)), end="")
-            else:
-                print(f"{protocol}", end="")
-                print(f"{pkt_type}", end="")
-                print(" " * (13 - len(pkt_type)), end="")
+        if protocol != "TCP":
+            print(f"{protocol}", end="")
+            print(" " * (16 - len(protocol)), end="")
+        else:
+            print(f"{protocol}", end="")
+            print(f"{pkt_type}", end="")
+            print(" " * (13 - len(pkt_type)), end="")
 
-            print(f"{pktLen}\t", end="")
-            print(f"{TTL}\t", end="")
-            print(f"{logDate}", end="")
-            print(" " * (130 - (len(logDate) + 113)) + f"{txtcolor.GREEN}|")
-            print("-" * 130)
-            print(f"{txtcolor.END}", end="")
+        print(f"{pktLen}\t", end="")
+        print(f"{TTL}\t", end="")
+        print(f"{logDate}", end="")
+        print(" " * (130 - (len(logDate) + 113)) + f"{txtcolor.GREEN}|")
+        print("-" * 130)
+        print(f"{txtcolor.END}", end="")
 
     display_scanned_lines(scanned_lines)
 
