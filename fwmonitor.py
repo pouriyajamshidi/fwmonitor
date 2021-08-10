@@ -16,6 +16,18 @@ class txtcolor:
     BOLD = "\033[1m"
 
 
+class IPv4:
+    SRC_IPV4_PTRN = re.compile(r"SRC=([0-9]{1,3}[\.]){3}[0-9]{1,3}")
+    DST_IPV4_PTRN = re.compile(r"DST=([0-9]{1,3}[\.]){3}[0-9]{1,3}")
+    PROTO_PTRN = re.compile(r"PROTO=\S*")
+    SRC_PORT_PTRN = re.compile(r"SPT=\d*")
+    DST_PORT_PTRN = re.compile(r"DPT=\d*")
+    PKT_LEN_PTRN = re.compile(r"LEN=\d*")
+    TTL_PTRN = re.compile(r"TTL=\d*")
+    LOG_DATE_PTRN = re.compile(r"^...\s* \d* \d\d:\d\d:\d\d")
+    PKT_TYPE_PTRN = re.compile(r"RES=.* ... ")
+
+
 def sig_handler(frame, signal):
     exit(txtcolor.END)
 
@@ -94,16 +106,6 @@ def display_scanned_lines(scanned_lines):
 
 def analyze_ipv4_log(log, key, interval):
 
-    src_ipv4_ptrn = re.compile(r"SRC=([0-9]{1,3}[\.]){3}[0-9]{1,3}")
-    dst_ipv4_ptrn = re.compile(r"DST=([0-9]{1,3}[\.]){3}[0-9]{1,3}")
-    proto_ptrn = re.compile(r"PROTO=\S*")
-    src_port_ptrn = re.compile(r"SPT=\d*")
-    dst_port_ptrn = re.compile(r"DPT=\d*")
-    pkt_len_ptrn = re.compile(r"LEN=\d*")
-    TTL_ptrn = re.compile(r"TTL=\d*")
-    log_date_ptrn = re.compile(r"^...\s* \d* \d\d:\d\d:\d\d")
-    pkt_type_ptrn = re.compile(r"RES=.* ... ")
-
     counter = 0
     scanned_lines = 0
     found = False
@@ -111,7 +113,7 @@ def analyze_ipv4_log(log, key, interval):
     for line in log:
         scanned_lines += 1
 
-        if key not in line or not re.search(src_ipv4_ptrn, line):
+        if key not in line or not re.search(IPv4.SRC_IPV4_PTRN, line):
             continue
 
         found = True
@@ -127,13 +129,13 @@ def analyze_ipv4_log(log, key, interval):
             print("-" * 130)
             print(f"{txtcolor.END}", end="")
 
-        srcIP_raw = re.search(src_ipv4_ptrn, line)[0]
+        srcIP_raw = re.search(IPv4.SRC_IPV4_PTRN, line)[0]
         srcIP = srcIP_raw.replace("SRC=", "")
 
-        dstIP_raw = re.search(dst_ipv4_ptrn, line)[0]
+        dstIP_raw = re.search(IPv4.DST_IPV4_PTRN, line)[0]
         dstIP = dstIP_raw.replace("DST=", "")
 
-        protocol_raw = re.search(proto_ptrn, line)[0]
+        protocol_raw = re.search(IPv4.PROTO_PTRN, line)[0]
         protocol = protocol_raw.replace("PROTO=", "")
 
         # to have a more compact code and make line 159 possible
@@ -141,14 +143,14 @@ def analyze_ipv4_log(log, key, interval):
 
         # let's see if we need to look for src/dst ports
         if protocol in ["TCP", "UDP"]:
-            srcPort_raw = re.search(src_port_ptrn, line)[0]
+            srcPort_raw = re.search(IPv4.SRC_PORT_PTRN, line)[0]
             srcPort = srcPort_raw.replace("SPT=", "")
-            dstPort_raw = re.search(dst_port_ptrn, line)[0]
+            dstPort_raw = re.search(IPv4.DST_PORT_PTRN, line)[0]
             dstPort = dstPort_raw.replace("DPT=", "")
 
             # tcp has packet type unlike UDP
             if protocol == "TCP":
-                pkt_type_raw = re.search(pkt_type_ptrn, line)[0]
+                pkt_type_raw = re.search(IPv4.PKT_TYPE_PTRN, line)[0]
                 pkt_type = pkt_type_raw.replace("RES=0x00 ", "/")
 
         elif protocol in ["ICM", "ICMP"]:
@@ -160,13 +162,13 @@ def analyze_ipv4_log(log, key, interval):
             srcPort = "NULL"
             dstPort = "NULL"
 
-        pktLen = re.search(pkt_len_ptrn, line)[0]
+        pktLen = re.search(IPv4.PKT_LEN_PTRN, line)[0]
         pktLen = pktLen.replace("LEN=", "")
 
-        TTL_raw = re.search(TTL_ptrn, line)[0]
+        TTL_raw = re.search(IPv4.TTL_PTRN, line)[0]
         TTL = TTL_raw.replace("TTL=", "")
 
-        logDate = re.search(log_date_ptrn, line)[0]
+        logDate = re.search(IPv4.LOG_DATE_PTRN, line)[0]
 
         print(f"{txtcolor.BOLD}", end="")
         print(f"{counter})\t", end="")
