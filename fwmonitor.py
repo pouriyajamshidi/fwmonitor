@@ -123,9 +123,9 @@ def analyze_ipv4_log(log, key, interval):
         # hundreds of thousands if not millions of function calls on large files
         if counter == 1 or (counter % 15) == 0:
             print(f"{txtcolor.GREEN}{txtcolor.BOLD}", end="")
-            print(f"\nCount\tSource IP\tSource Port", end="")
-            print(f"\tDestination IP\t  Destination Port", end="")
-            print(f"\tProtocol/Type\tLEN\tTTL\tDate")
+            print("\nCount\tSource IP\tSource Port", end="")
+            print("\tDestination IP\t  Destination Port", end="")
+            print("\tProtocol/Type\tLEN\tTTL\tDate")
             print("-" * 130)
             print(f"{txtcolor.END}", end="")
 
