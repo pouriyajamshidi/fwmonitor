@@ -107,7 +107,16 @@ def display_scanned_lines(scanned_lines):
     print("\033[0m")
 
 
-def analyze_ipv4_log(log, key, interval):
+def print_banner():
+    print(f"{TXTColor.GREEN}{TXTColor.BOLD}", end="")
+    print("\nCount\tSource IP\tSource Port", end="")
+    print("\tDestination IP\t  Destination Port", end="")
+    print("\tProtocol/Type\tLEN\tTTL\tDate")
+    print("-" * 130)
+    print(f"{TXTColor.END}", end="")
+
+
+def analyze_ipv4_log(log, key):
     counter = 0
     scanned_lines = 0
     found = False
@@ -121,13 +130,8 @@ def analyze_ipv4_log(log, key, interval):
         found = True
         counter += 1
 
-        if counter == 1 or (counter % 15) == 0:
-            print(f"{TXTColor.GREEN}{TXTColor.BOLD}", end="")
-            print("\nCount\tSource IP\tSource Port", end="")
-            print("\tDestination IP\t  Destination Port", end="")
-            print("\tProtocol/Type\tLEN\tTTL\tDate")
-            print("-" * 130)
-            print(f"{TXTColor.END}", end="")
+        if counter == 1 or (counter % 20) == 0:
+            print_banner()
 
         src_ip_raw = re.search(IPv4.SRC_IPV4_PTRN, line)[0]
         src_ip = src_ip_raw.replace("SRC=", "")
@@ -138,7 +142,6 @@ def analyze_ipv4_log(log, key, interval):
         protocol_raw = re.search(IPv4.PROTO_PTRN, line)[0]
         protocol = protocol_raw.replace("PROTO=", "")
 
-        # to have a more compact code and make line 159 possible
         src_port = dst_port = None
 
         # let's see if we need to look for src/dst ports
@@ -147,20 +150,14 @@ def analyze_ipv4_log(log, key, interval):
             src_port = src_port_raw.replace("SPT=", "")
             dst_port_raw = re.search(IPv4.DST_PORT_PTRN, line)[0]
             dst_port = dst_port_raw.replace("DPT=", "")
-
-            # tcp has packet type unlike UDP
+            # TCP has packet type unlike UDP
             if protocol == "TCP":
                 pkt_type_raw = re.search(IPv4.PKT_TYPE_PTRN, line)[0]
                 pkt_type = pkt_type_raw.replace("RES=0x00 ", "/")
-
         elif protocol in ["ICM", "ICMP"]:
             protocol = "ICMP"
         elif protocol == "2":
             protocol = "IGMP"
-
-        if not src_port or not dst_port:
-            src_port = "NULL"
-            dst_port = "NULL"
 
         pkt_len = re.search(IPv4.PKT_LEN_PTRN, line)[0]
         pkt_len = pkt_len.replace("LEN=", "")
@@ -206,7 +203,7 @@ def main():
 
     while True:
         log = read_file(logfile)   # Tackles log rotation
-        result, scanned_lines = analyze_ipv4_log(log, key, interval)
+        result, scanned_lines = analyze_ipv4_log(log, key)
         display_scanned_lines(scanned_lines)
         if not result:
             report_not_found(key)
