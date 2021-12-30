@@ -2,13 +2,15 @@
 
 import re
 import signal
+import sys
 from argparse import ArgumentParser
 from pathlib import Path
 from time import sleep
 
 
-class txtcolor:
+class TXTColor:
     BLUE = "\033[94m"
+    CYAN = "\033[36m"
     GREEN = "\033[92m"
     WARNING = "\033[93m"
     FAIL = "\033[91m"
@@ -29,24 +31,24 @@ class IPv4:
 
 
 def sig_handler(frame, signal):
-    exit(txtcolor.END)
+    sys.exit(TXTColor.END)
 
 
 def get_user_input():
     parser = ArgumentParser()
 
     parser.add_argument(
-        "-file",
+        "--file",
         default="/var/log/syslog",
         help="file to inspect. Default is /var/log/syslog",
     )
     parser.add_argument(
-        "-key",
+        "--key",
         default="UFW BLOCK",
         help="block/reject keyword to look for. Default is 'UFW BLOCK'",
     )
     parser.add_argument(
-        "-interval",
+        "--interval",
         default=60,
         help="interval to check the file in seconds. Default is 60"
         + ". specify 'onetime' to run once",
@@ -63,18 +65,17 @@ def validate_interval(interval):
     try:
         return int(interval)
     except ValueError:
-        print(f"{txtcolor.FAIL}[-] Invalid interval")
+        print(f"{TXTColor.FAIL}[-] Invalid interval value")
         print("\033[0m")
-        exit()
+        sys.exit()
 
 
 def check_file(logfile):
-
     if not Path(logfile).is_file():
-        print(f"{txtcolor.FAIL}", end="")
-        print(f"[-] Cannot access {logfile}")
-        print(f"{txtcolor.END}", end="")
-        exit(1)
+        print(f"{TXTColor.FAIL}", end="")
+        print(f"[-] Cannot find {logfile}")
+        print(f"{TXTColor.END}", end="")
+        sys.exit(1)
 
 
 def read_file(file):
@@ -84,18 +85,20 @@ def read_file(file):
 
 
 def sleep_for(interval):
+    print(TXTColor.CYAN, end="")
+
     while interval != 0:
-        print("\033[36m", end="")
         print(f"\r[+] re-scanning in {interval}", flush=True, end=" ")
-        print("\033[0m", end="")
         interval -= 1
         sleep(1)
 
+    print(TXTColor.END, end="")
+
 
 def report_not_found(key):
-    print(f"{txtcolor.FAIL}{txtcolor.BOLD}", end="")
+    print(f"{TXTColor.FAIL}{TXTColor.BOLD}", end="")
     print(f"[-] Could not find a log with '{key}' keyword")
-    print(f"{txtcolor.WARNING}{txtcolor.BOLD}", end="")
+    print(f"{TXTColor.WARNING}{TXTColor.BOLD}", end="")
 
 
 def display_scanned_lines(scanned_lines):
@@ -105,7 +108,6 @@ def display_scanned_lines(scanned_lines):
 
 
 def analyze_ipv4_log(log, key, interval):
-
     counter = 0
     scanned_lines = 0
     found = False
@@ -119,34 +121,32 @@ def analyze_ipv4_log(log, key, interval):
         found = True
         counter += 1
 
-        # Delegating this banner print to another function will result in
-        # hundreds of thousands if not millions of function calls on large files
         if counter == 1 or (counter % 15) == 0:
-            print(f"{txtcolor.GREEN}{txtcolor.BOLD}", end="")
+            print(f"{TXTColor.GREEN}{TXTColor.BOLD}", end="")
             print("\nCount\tSource IP\tSource Port", end="")
             print("\tDestination IP\t  Destination Port", end="")
             print("\tProtocol/Type\tLEN\tTTL\tDate")
             print("-" * 130)
-            print(f"{txtcolor.END}", end="")
+            print(f"{TXTColor.END}", end="")
 
-        srcIP_raw = re.search(IPv4.SRC_IPV4_PTRN, line)[0]
-        srcIP = srcIP_raw.replace("SRC=", "")
+        src_ip_raw = re.search(IPv4.SRC_IPV4_PTRN, line)[0]
+        src_ip = src_ip_raw.replace("SRC=", "")
 
-        dstIP_raw = re.search(IPv4.DST_IPV4_PTRN, line)[0]
-        dstIP = dstIP_raw.replace("DST=", "")
+        dst_ip_raw = re.search(IPv4.DST_IPV4_PTRN, line)[0]
+        dst_ip = dst_ip_raw.replace("DST=", "")
 
         protocol_raw = re.search(IPv4.PROTO_PTRN, line)[0]
         protocol = protocol_raw.replace("PROTO=", "")
 
         # to have a more compact code and make line 159 possible
-        srcPort = dstPort = None
+        src_port = dst_port = None
 
         # let's see if we need to look for src/dst ports
         if protocol in ["TCP", "UDP"]:
-            srcPort_raw = re.search(IPv4.SRC_PORT_PTRN, line)[0]
-            srcPort = srcPort_raw.replace("SPT=", "")
-            dstPort_raw = re.search(IPv4.DST_PORT_PTRN, line)[0]
-            dstPort = dstPort_raw.replace("DPT=", "")
+            src_port_raw = re.search(IPv4.SRC_PORT_PTRN, line)[0]
+            src_port = src_port_raw.replace("SPT=", "")
+            dst_port_raw = re.search(IPv4.DST_PORT_PTRN, line)[0]
+            dst_port = dst_port_raw.replace("DPT=", "")
 
             # tcp has packet type unlike UDP
             if protocol == "TCP":
@@ -158,24 +158,24 @@ def analyze_ipv4_log(log, key, interval):
         elif protocol == "2":
             protocol = "IGMP"
 
-        if not srcPort or not dstPort:
-            srcPort = "NULL"
-            dstPort = "NULL"
+        if not src_port or not dst_port:
+            src_port = "NULL"
+            dst_port = "NULL"
 
-        pktLen = re.search(IPv4.PKT_LEN_PTRN, line)[0]
-        pktLen = pktLen.replace("LEN=", "")
+        pkt_len = re.search(IPv4.PKT_LEN_PTRN, line)[0]
+        pkt_len = pkt_len.replace("LEN=", "")
 
-        TTL_raw = re.search(IPv4.TTL_PTRN, line)[0]
-        TTL = TTL_raw.replace("TTL=", "")
+        ttl_raw = re.search(IPv4.TTL_PTRN, line)[0]
+        ttl = ttl_raw.replace("TTL=", "")
 
-        logDate = re.search(IPv4.LOG_DATE_PTRN, line)[0]
+        log_date = re.search(IPv4.LOG_DATE_PTRN, line)[0]
 
-        print(f"{txtcolor.BOLD}", end="")
+        print(f"{TXTColor.BOLD}", end="")
         print(f"{counter})\t", end="")
-        print(f"{srcIP}\t", end="")
-        print(f"{srcPort}\t\t", end="")
-        print(f"{dstIP}\t  ", end="")
-        print(f"{dstPort}\t\t\t", end="")
+        print(f"{src_ip}\t", end="")
+        print(f"{src_port}\t\t", end="")
+        print(f"{dst_ip}\t  ", end="")
+        print(f"{dst_port}\t\t\t", end="")
 
         if protocol != "TCP":
             print(f"{protocol}", end="")
@@ -185,45 +185,39 @@ def analyze_ipv4_log(log, key, interval):
             print(f"{pkt_type}", end="")
             print(" " * (13 - len(pkt_type)), end="")
 
-        print(f"{pktLen}\t", end="")
-        print(f"{TTL}\t", end="")
-        print(f"{logDate}", end="")
-        print(" " * (130 - (len(logDate) + 113)) + f"{txtcolor.GREEN}|")
+        print(f"{pkt_len}\t", end="")
+        print(f"{ttl}\t", end="")
+        print(f"{log_date}", end="")
+        print(" " * (130 - (len(log_date) + 113)) + f"{TXTColor.GREEN}|")
         print("-" * 130)
-        print(f"{txtcolor.END}", end="")
+        print(f"{TXTColor.END}", end="")
 
-    display_scanned_lines(scanned_lines)
-
-    if not found:
-        report_not_found(key)
-        if interval != "onetime":
-            sleep_for(10)
-            return
-
-    if interval == "onetime":
-        exit()
-
-    print("\n\n")
-    sleep_for(interval)
+    return found, scanned_lines
 
 
 def main():
-
-    signal.signal(signal.SIGINT, sig_handler)
-
     logfile, key, interval = get_user_input()
-
     interval = validate_interval(interval)
     check_file(logfile)
 
-    print(f"{txtcolor.BOLD}", end="")
-    print(f"\n{txtcolor.BLUE}[*] Scanning {logfile} using {key} keyword")
-    print(f"{txtcolor.END}", end="")
+    print(f"{TXTColor.BOLD}")
+    print(f"{TXTColor.BLUE}[*] Scanning {logfile} using {key} keyword")
+    print(f"{TXTColor.END}", end="")
 
     while True:
-        log = read_file(logfile)
-        analyze_ipv4_log(log, key, interval)
+        log = read_file(logfile)   # Tackles log rotation
+        result, scanned_lines = analyze_ipv4_log(log, key, interval)
+        display_scanned_lines(scanned_lines)
+        if not result:
+            report_not_found(key)
+            if interval != "onetime":
+                sleep_for(10)
+        if interval == "onetime":
+            sys.exit()
+        print("\n\n")
+        sleep_for(interval)
 
 
 if __name__ == "__main__":
+    signal.signal(signal.SIGINT, sig_handler)
     main()
