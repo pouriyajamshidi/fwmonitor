@@ -106,7 +106,7 @@ def report_not_found(key: str) -> None:
     print(f"{TXTColor.WARNING}{TXTColor.BOLD}", end="")
 
 
-def display_scanned_lines_number(scanned_lines: str) -> None:
+def display_scanned_lines_number(scanned_lines: int) -> None:
     print(f"{TXTColor.CYAN}", end="")
     print(f"\n[*] Scanned {scanned_lines} lines!")
     print(f"{TXTColor.END}", end="")
