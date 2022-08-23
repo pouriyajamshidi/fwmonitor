@@ -6,7 +6,7 @@ import sys
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
 from time import sleep
-from typing import List, NoReturn, Tuple, Union
+from typing import List, NoReturn, Tuple
 
 
 class TXTColor:
@@ -60,18 +60,19 @@ def get_user_input() -> Namespace:
         "--interval",
         default=60,
         help="interval to check the file in seconds. Default is 60"
-        + ". specify 'once' to run once",
+        + ". specify '0' to run once",
     )
     parser.add_argument("--ipv6", default=False, help="scan for IPv6 logs")
 
     return parser.parse_args()
 
 
-def validate_interval(interval: str) -> Union[str, int]:
-    if interval == "once":
-        return interval
+def validate_interval(interval: str) -> int:
     try:
-        return int(interval)
+        value = int(interval)
+        if value < 0:
+            sys.exit(f"{TXTColor.FAIL}[-] Invalid interval value{TXTColor.END}")
+        return value
     except ValueError:
         sys.exit(f"{TXTColor.FAIL}[-] Invalid interval value{TXTColor.END}")
 
@@ -118,6 +119,12 @@ def print_banner() -> None:
     print("\tDestination IP\t  Destination Port", end="")
     print("\tProtocol/Type\tLEN\tTTL\tDate")
     print("-" * 130)
+    print(f"{TXTColor.END}", end="")
+
+
+def print_initial_info(logfile: str, key: str) -> None:
+    print(f"{TXTColor.BOLD}")
+    print(f"{TXTColor.BLUE}[*] Scanning {logfile} using the '{key}' keyword")
     print(f"{TXTColor.END}", end="")
 
 
@@ -270,9 +277,7 @@ def main() -> None:
 
     check_logfile_exists(logfile)
 
-    print(f"{TXTColor.BOLD}")
-    print(f"{TXTColor.BLUE}[*] Scanning {logfile} using {args.key} keyword")
-    print(f"{TXTColor.END}", end="")
+    print_initial_info(logfile, key)
 
     while True:
         log = read_logfile(logfile)  # Tackles log rotation
@@ -286,7 +291,7 @@ def main() -> None:
 
         if not has_result:
             report_not_found(key)
-        if interval == "once":
+        if interval == 0:
             sys.exit()
 
         print("\n")
