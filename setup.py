@@ -8,7 +8,7 @@ setuptools.setup(
     version="1.2.1",
     author="Pouriya Jamshidi",
     scripts=["fwmonitor"],
-    description="monitor the fw",
+    description="for network traffic analysis, displays your iptables, UFW, or any application that logs in the same format, in a pleasant way.",
     long_description=long_description,
     long_description_content="text/markdown",
     python_requires=">=3.6",
