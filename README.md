@@ -1,14 +1,20 @@
-# IPMonitor
+# FWMonitor
 
-`ipmonitor` can be used to grok `IPTABLES`, `UFW` or any program that logs similar to `IPTABLES`, logs from your `syslog` (_active_) or a gathered log/text file (_passive_) in a comprehensive format in order to conduct network traffic analysis and security audit of your servers.
+`fwmonitor` can be used to grok `IPTABLES`, `UFW` or any program that logs similar to `IPTABLES`, logs from your `syslog` (_active_) or a gathered log/text file (_passive_) in a comprehensive format in order to conduct network traffic analysis and security audit of your servers.
 
 ## Demo
 
-[![asciicast](https://asciinema.org/a/394593.svg)](https://asciinema.org/a/394593)
+![fwmonitor](images/fwmonitor.gif)
 
 ## Usage
 
-Clone this repository:
+Install from `PIP`:
+
+```bash
+pip3 install fwmonitor
+```
+
+Or clone this repository:
 
 ```bash
 git clone https://github.com/pouriyajamshidi/fwmonitor.git
@@ -26,6 +32,10 @@ For your convenience, you can place the program in your system PATH, like `/bin/
 sudo cp fwmonitor.py /usr/local/bin/fwmonitor
 ```
 
+---
+
+## Flags
+
 This script takes 4 optional arguments. These arguments are:
 
 **`--file`**: Location of log file to be scanned. Default location is **/var/log/syslog**
@@ -36,29 +46,33 @@ This script takes 4 optional arguments. These arguments are:
 
 **`--ipv6`**: Display `IPv6` logs. Default is **IPv4**
 
-_By running the script without providing any arguments, the default values as mentioned below above be used._
+**`--version`**: Display version and exit
 
-```python
-./fwmonitor.py
-```
+_By running the script without providing any arguments, the default values as mentioned below above be used._
 
 ## Examples
 
 To analyze a log file that you have gathered:
 
 ```python
+fwmonitor --file mytraffic.log --key "IPTABLES_BLOCK" --interval 0
+# OR
 python3 fwmonitor.py --file mytraffic.log --key "IPTABLES_BLOCK" --interval 0
 ```
 
 Audit a live server:
 
 ```python
+fwmonitor --file /var/log/syslog --key "IPTABLES_BLOCK"
+# OR
 python3 fwmonitor.py --file /var/log/syslog --key "IPTABLES_BLOCK"
 ```
 
 Additionally, there is a `sample.log` in this repository that you can utilize to see how this script works without actually having a log file yourself. Use it like:
 
 ```bash
+fwmonitor --file sample.log --key "UFW BLOCK" --interval 0
+# OR
 python3 fwmonitor.py --file sample.log --key "UFW BLOCK" --interval 0
 ```
 
@@ -70,9 +84,7 @@ _It can be used on `Windows` and `Mac OS` as well to analyze the gathered log fi
 
 ## TODO
 
-- [x] IGMP support
-- [ ] Implement smart spacing
-- [ ] IPv6 support
+- [ ] Implement smart spacing for rows.
 
 ## Contributing
 

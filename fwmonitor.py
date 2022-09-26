@@ -8,6 +8,8 @@ from pathlib import Path
 from time import sleep
 from typing import List, NoReturn, Tuple
 
+__version__ = "1.2.1"
+
 
 class TXTColor:
     BLUE = "\033[94m"
@@ -65,6 +67,9 @@ def get_user_input() -> Namespace:
     )
     parser.add_argument(
         "--ipv6", default=False, action="store_true", help="scan IPv6 logs"
+    )
+    parser.add_argument(
+        "--version", default=False, action="store_true", help="show version"
     )
 
     return parser.parse_args()
@@ -151,6 +156,9 @@ def analyze_ipv4_log(logs: List[str], key: str) -> Tuple[bool, int]:
         src_ip = re.search(IPv4.SRC_IPV4_PTRN, line)[0].replace("SRC=", "")
         dst_ip = re.search(IPv4.DST_IPV4_PTRN, line)[0].replace("DST=", "")
         protocol = re.search(IPv4.PROTO_PTRN, line)[0].replace("PROTO=", "")
+        pkt_len = re.search(IPv4.PKT_LEN_PTRN, line)[0].replace("LEN=", "")
+        ttl = re.search(IPv4.TTL_PTRN, line)[0].replace("TTL=", "")
+        log_date = re.search(IPv4.LOG_DATE_PTRN, line)[0]
         src_port = dst_port = None
 
         # let's see if we need to look for src/dst ports
@@ -167,10 +175,6 @@ def analyze_ipv4_log(logs: List[str], key: str) -> Tuple[bool, int]:
         elif protocol == "2":
             protocol = "IGMP"
 
-        pkt_len = re.search(IPv4.PKT_LEN_PTRN, line)[0].replace("LEN=", "")
-        ttl = re.search(IPv4.TTL_PTRN, line)[0].replace("TTL=", "")
-        log_date = re.search(IPv4.LOG_DATE_PTRN, line)[0]
-
         log = f"{counter})\t{src_ip}\t{src_port}\t\t{dst_ip}\t  {dst_port}\t\t\t"
 
         if protocol != "TCP":
@@ -183,10 +187,8 @@ def analyze_ipv4_log(logs: List[str], key: str) -> Tuple[bool, int]:
         log += f"{pkt_len}\t{ttl}\t{log_date}"
         log += " " * (130 - (len(log_date) + 113)) + f"{TXTColor.GREEN}|"
 
-        print(f"{TXTColor.BOLD}", end="")
-        print(log)
-        print("-" * 130)
-        print(f"{TXTColor.END}", end="")
+        print(f"{TXTColor.BOLD}{log}")
+        print(f"{'-' * 130}{TXTColor.END}")
 
     return found, scanned_lines
 
@@ -208,6 +210,9 @@ def analyze_ipv6_log(logs: List[str], key: str) -> Tuple[bool, int]:
         src_ip = re.search(IPv6.SRC_IPV6_PTRN, line)[0].replace("SRC=", "")
         dst_ip = re.search(IPv6.DST_IPV6_PTRN, line)[0].replace("DST=", "")
         protocol = re.search(IPv6.PROTO_PTRN, line)[0].replace("PROTO=", "")
+        pkt_len = re.search(IPv6.PKT_LEN_PTRN, line)[0].replace("LEN=", "")
+        ttl = re.search(IPv6.TTL_PTRN, line)[0].replace("HOPLIMIT=", "")
+        log_date = re.search(IPv6.LOG_DATE_PTRN, line)[0]
         src_port = dst_port = None
 
         # let's see if we need to look for src/dst ports
@@ -224,10 +229,6 @@ def analyze_ipv6_log(logs: List[str], key: str) -> Tuple[bool, int]:
         elif protocol == "2":
             protocol = "IGMP"
 
-        pkt_len = re.search(IPv6.PKT_LEN_PTRN, line)[0].replace("LEN=", "")
-        ttl = re.search(IPv6.TTL_PTRN, line)[0].replace("HOPLIMIT=", "")
-        log_date = re.search(IPv6.LOG_DATE_PTRN, line)[0]
-
         log = f"{counter})\nSource IP: {src_ip}\nSource Port: {src_port}\n"
         log += f"Destination IP: {dst_ip}\nDestination Port: {dst_port}\n"
 
@@ -240,7 +241,7 @@ def analyze_ipv6_log(logs: List[str], key: str) -> Tuple[bool, int]:
 
         print(f"{TXTColor.BOLD}", end="")
         print(f"{TXTColor.GREEN}-" * 80)
-        print(f"{TXTColor.END}{log}")
+        print(f"{TXTColor.END}{TXTColor.BOLD}{log}")
         print(f"{TXTColor.GREEN}-" * 80)
         print(f"{TXTColor.END}", end="")
 
@@ -252,6 +253,11 @@ def main() -> None:
     logfile = args.file
     key = args.key
     interval = validate_interval(args.interval)
+    version = args.version
+
+    if version:
+        print(__version__)
+        sys.exit(0)
 
     check_logfile_exists(logfile)
 
