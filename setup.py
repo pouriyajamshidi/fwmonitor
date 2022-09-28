@@ -5,12 +5,12 @@ with open("README.md", "r") as f:
 
 setuptools.setup(
     name="fwmonitor",
-    version="1.2.1",
+    version="1.2.3",
     author="Pouriya Jamshidi",
     scripts=["fwmonitor"],
     description="for network traffic analysis, displays your iptables, UFW, or any application that logs in the same format, in a pleasant way.",
     long_description=long_description,
-    long_description_content="text/markdown",
+    long_description_content_type="text/markdown",
     python_requires=">=3.6",
     classifiers=[
         "Programming Language :: Python :: 3",
