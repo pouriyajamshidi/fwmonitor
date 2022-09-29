@@ -10,6 +10,18 @@ from typing import List, NoReturn, Tuple
 
 __version__ = "1.2.3"
 
+padding = {
+    "count": 8,
+    "src_ip": 16,
+    "src_port": 16,
+    "dst_ip": 18,
+    "dst_port": 22,
+    "protocol": 16,
+    "pkt_len": 8,
+    "ttl": 8,
+    "date": 17,
+}
+
 
 class TXTColor:
     BLUE = "\033[94m"
@@ -158,8 +170,8 @@ def analyze_ipv4_log(logs: List[str], key: str) -> Tuple[bool, int]:
         protocol = re.search(IPv4.PROTO_PTRN, line)[0].replace("PROTO=", "")
         pkt_len = re.search(IPv4.PKT_LEN_PTRN, line)[0].replace("LEN=", "")
         ttl = re.search(IPv4.TTL_PTRN, line)[0].replace("TTL=", "")
-        log_date = re.search(IPv4.LOG_DATE_PTRN, line)[0]
-        src_port = dst_port = None
+        date = re.search(IPv4.LOG_DATE_PTRN, line)[0]
+        src_port = dst_port = "None"
 
         # let's see if we need to look for src/dst ports
         if protocol in ["TCP", "UDP"]:
@@ -175,17 +187,36 @@ def analyze_ipv4_log(logs: List[str], key: str) -> Tuple[bool, int]:
         elif protocol == "2":
             protocol = "IGMP"
 
-        log = f"{counter})\t{src_ip}\t{src_port}\t\t{dst_ip}\t  {dst_port}\t\t\t"
+        log_counter = f"{counter})" + " " * (padding["count"] - (len(str(counter)) + 1))
+        src_ip = f"{src_ip}" + " " * (padding["src_ip"] - len(src_ip))
+        src_port = f"{src_port}" + " " * (padding["src_port"] - len(src_port))
+        dst_ip = f"{dst_ip}" + " " * (padding["dst_ip"] - len(dst_ip))
+        dst_port = f"{dst_port}" + " " * (padding["dst_port"] - len(dst_port))
 
         if protocol != "TCP":
-            log += protocol
-            log += " " * (16 - len(protocol))
+            protocol = f"{protocol}" + " " * (padding["protocol"] - len(protocol))
         else:
-            log += protocol + pkt_type
-            log += " " * (13 - len(pkt_type))
+            protocol = f"{protocol}{pkt_type}" + " " * (
+                padding["protocol"] - (len(protocol) + len(pkt_type))
+            )
 
-        log += f"{pkt_len}\t{ttl}\t{log_date}"
-        log += " " * (130 - (len(log_date) + 113)) + f"{TXTColor.GREEN}|"
+        pkt_len = f"{pkt_len}" + " " * (padding["pkt_len"] - len(pkt_len))
+        ttl = f"{ttl}" + " " * (padding["ttl"] - len(ttl))
+        date = f"{date}" + " " * (padding["date"] - len(date))
+        end_line = f"{TXTColor.GREEN}|"
+
+        log = (
+            log_counter
+            + src_ip
+            + src_port
+            + dst_ip
+            + dst_port
+            + protocol
+            + pkt_len
+            + ttl
+            + date
+            + end_line
+        )
 
         print(f"{TXTColor.BOLD}{log}")
         print(f"{'-' * 130}{TXTColor.END}")
