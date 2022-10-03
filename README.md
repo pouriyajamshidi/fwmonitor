@@ -4,7 +4,7 @@
 
 ## Demo
 
-![fwmonitor](images/fwmonitor.gif)
+![fwmonitor](https://github.com/pouriyajamshidi/fwmonitor/raw/master/images/fwmonitor.gif)
 
 ## Usage
 
