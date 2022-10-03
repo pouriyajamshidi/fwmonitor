@@ -8,7 +8,7 @@ from pathlib import Path
 from time import sleep
 from typing import List, NoReturn, Tuple
 
-__version__ = "1.2.3"
+__version__ = "1.2.4"
 
 padding = {
     "count": 8,
