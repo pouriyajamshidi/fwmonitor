@@ -2,9 +2,11 @@
 
 `fwmonitor` can be used to grok `IPTABLES`, `UFW` or any program that logs similar to `IPTABLES`, logs from your `syslog` (_active_) or a gathered log/text file (_passive_) in a comprehensive format in order to conduct network traffic analysis and security audit of your servers.
 
+[![Downloads](https://static.pepy.tech/badge/fwmonitor)](https://pepy.tech/project/fwmonitor)
+
 ## Demo
 
-![fwmonitor](images/fwmonitor.gif)
+![fwmonitor](https://github.com/pouriyajamshidi/fwmonitor/raw/master/images/fwmonitor.gif)
 
 ## Usage
 
